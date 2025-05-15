@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hash Generator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #1c1c28, #2c2a42);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .container {
+    max-width: 520px;
+    background-color: #2a2a40;
+    border-radius: 12px;
+    padding: 30px 40px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: #a6c1ee;
+  }
+  p.subheading {
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: 400;
+    color: #8f94fb;
+  }
+  textarea, input {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 20px;
+    font-size: 1rem;
+    font-family: monospace;
+    background-color: #1e1e2f;
+    color: #e0e0e0;
+    box-shadow: inset 0 0 8px #353556;
+    resize: vertical;
+    min-height: 60px;
+    transition: box-shadow 0.3s ease;
+  }
+  textarea:focus, input:focus {
+    outline: none;
+    box-shadow: inset 0 0 12px #587bfb;
+  }
+  button {
+    margin-top: 20px;
+    background: #6c63ff;
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 20px rgba(108, 99, 255, 0.7);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  button:hover {
+    background: #554ad1;
+    box-shadow: 0 15px 35px rgba(85, 74, 209, 0.8);
+  }
+  .result {
+    margin-top: 30px;
+    background-color: #1c1c2f;
+    border-radius: 12px;
+    padding: 15px 20px;
+    font-size: 1rem;
+    word-break: break-word;
+    text-align: left;
+  }
+  .hash-type {
+    color: #8f94fb;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  footer {
+    margin-top: 30px;
+    font-size: 0.85rem;
+    color: #666a93;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hash Generator</h1>
+    <p class="subheading">Enter text to generate hash values</p>
+
+    <textarea id="textInput" placeholder="Type your message..." aria-label="Input text"></textarea>
+    <button id="generateBtn">Generate Hashes</button>
+
+    <div id="result" class="result" aria-live="polite"></div>
+
+    <footer>
+      Uses Web Crypto API (SHA1, SHA2) and CryptoJS (MD5)
+    </footer>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+  async function digestMessage(message, algo) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hashBuffer = await crypto.subtle.digest(algo, data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const input = document.getElementById('textInput').value;
+    if (!input.trim()) {
+      document.getElementById('result').textContent = "Please enter some text.";
+      return;
+    }
+
+    const md5 = CryptoJS.MD5(input).toString();
+    const sha1 = await digestMessage(input, "SHA-1");
+    const sha256 = await digestMessage(input, "SHA-256");
+    const sha384 = await digestMessage(input, "SHA-384");
+    const sha512 = await digestMessage(input, "SHA-512");
+
+    document.getElementById('result').innerHTML = `
+      <div><span class="hash-type">MD5:</span><br>${md5}</div>
+      <div><span class="hash-type">SHA-1:</span><br>${sha1}</div>
+      <div><span class="hash-type">SHA-256:</span><br>${sha256}</div>
+      <div><span class="hash-type">SHA-384:</span><br>${sha384}</div>
+      <div><span class="hash-type">SHA-512:</span><br>${sha512}</div>
+    `;
+  });
+</script>
+</body>
+</html>
